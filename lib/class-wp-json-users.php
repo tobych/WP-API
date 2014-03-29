@@ -32,6 +32,7 @@ class WP_JSON_Users {
 			'/users/(?P<id>\d+)' => array(
 				array( array( $this, 'get_user' ), WP_JSON_Server::READABLE ),
 				array( array( $this, 'edit_user' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
+				array( array( $this, 'delete_user' ), WP_JSON_Server::DELETABLE ),
 			)
 		);
 		return array_merge( $routes, $user_routes );
@@ -123,6 +124,37 @@ class WP_JSON_Users {
 		       'description' => $user->description,
 		  );
 		  return $user_fields;
+	}
+
+	/**
+	 * Delete a user
+	 *
+	 * @param int $id
+	 * @return true on success
+	 */
+	public function delete_user( $id, $force = false ) {
+		$id = (int) $id;
+
+		if ( empty( $id ) )
+			return new WP_Error( 'json_user_invalid_id', __( 'Invalid user ID.' ), array( 'status' => 404 ) );
+
+		// Permissions check
+		if ( ! current_user_can( 'edit_users' ) ) {
+			return new WP_Error( 'json_cannot_edit', __( 'Sorry, you are not allowed to edit this user.' ), array( 'status' => 401 ) );
+		}
+
+		$user = get_userdata( $id );
+
+		if ( ! $user )
+			return new WP_Error( 'json_user_invalid_id', __( 'Invalid user ID.' ), array( 'status' => 404 ) );
+
+		// https://codex.wordpress.org/Function_Reference/wp_delete_user
+		// TODO: Allow posts to be reassigned (see the docs for wp_delete_user) - use a HTTP parameter?
+		$result = wp_delete_user( $id );
+
+		if ( ! $result )
+			return new WP_Error( 'json_cannot_delete', __( 'The user cannot be deleted.' ), array( 'status' => 500 ) );
+
 	}
 
 	/**
