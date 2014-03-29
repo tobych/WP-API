@@ -13,7 +13,7 @@ class WP_JSON_Users {
 	 *
 	 * @param WP_JSON_ResponseHandler $server Server object
 	 */
-	public function __construct(WP_JSON_ResponseHandler $server) {
+	public function __construct( WP_JSON_ResponseHandler $server ) {
 		$this->server = $server;
 	}
 
@@ -57,18 +57,18 @@ class WP_JSON_Users {
 			return new WP_Error( 'json_cannot_get', __( 'Sorry, you are not allowed to get users.' ), array( 'status' => 401 ) );
 		}
 
-		$args = array('orderby' => 'user_login', 'order' => 'ASC');
-                $user_query = new WP_User_Query($args);
-                $struct = array();
-                if (!empty($user_query->results)) {
-                  foreach ( $user_query->results as $user ) {
-                    $struct[] = $this->prepare_user($user, $context);
-                  }
-                } else {
-                  return array();
-                }
-                return $struct;
-        }
+		$args = array( 'orderby' => 'user_login', 'order' => 'ASC' );
+		$user_query = new WP_User_Query( $args );
+		$struct = array();
+		if ( ! empty( $user_query->results ) ) {
+			foreach ( $user_query->results as $user ) {
+				$struct[ ] = $this->prepare_user( $user, $context );
+			}
+		} else {
+			return array();
+		}
+		return $struct;
+	}
 
 	/**
 	 * Retrieve a user.
@@ -107,23 +107,23 @@ class WP_JSON_Users {
 		return $response;
 	}
 
-        protected function prepare_user($user, $context = 'view') {
-		  // We're ignoring $fields for now, so you get all these fields
-		  $user_fields = array(
-		       'ID' => $user->ID,
-		       'login' => $user->user_login,
-		       'pass' => $user->user_pass, // Is this plaintext?
-		       'nicename' => $user->user_nicename,
-		       'email' => $user->user_email,
-		       'url' => $user->user_url,
-		       'registered' => $user->user_registered,
-		       'display_name' => $user->display_name,
-		       'first_name' => $user->first_name,
-		       'last_name' => $user->last_name,
-		       'nickname' => $user->nickname,
-		       'description' => $user->description,
-		  );
-		  return $user_fields;
+	protected function prepare_user( $user, $context = 'view' ) {
+		// We're ignoring $fields for now, so you get all these fields
+		$user_fields = array(
+			'ID' => $user->ID,
+			'login' => $user->user_login,
+			'pass' => $user->user_pass, // Is this plaintext?
+			'nicename' => $user->user_nicename,
+			'email' => $user->user_email,
+			'url' => $user->user_url,
+			'registered' => $user->user_registered,
+			'display_name' => $user->display_name,
+			'first_name' => $user->first_name,
+			'last_name' => $user->last_name,
+			'nickname' => $user->nickname,
+			'description' => $user->description,
+		);
+		return $user_fields;
 	}
 
 	/**
@@ -175,7 +175,7 @@ class WP_JSON_Users {
 			return new WP_Error( 'json_user_invalid_id', __( 'Invalid user ID (EMPTY).' ), array( 'status' => 404 ) );
 
 		// http://codex.wordpress.org/Function_Reference/get_userdata
-		$user = get_userdata( $id );  // returns False on failure
+		$user = get_userdata( $id ); // returns False on failure
 
 		if ( ! $user )
 			return new WP_Error( 'json_user_invalid_id', __( 'Invalid user ID (COULD NOT LOAD).' ), array( 'status' => 404 ) );
@@ -201,7 +201,7 @@ class WP_JSON_Users {
 		}
 
 		// http://codex.wordpress.org/Function_Reference/do_action
-		do_action( 'json_insert_user', $user, $data, true );  // $update is always true
+		do_action( 'json_insert_user', $user, $data, true ); // $update is always true
 
 		return $this->get_user( $id );
 	}
@@ -213,43 +213,43 @@ class WP_JSON_Users {
 	// user is a WP_User; $data is an array of fields to update
 	protected function update_user( $user, $data ) {
 
-		  // Won't let them update these fields: ID, login, pass, registered,
-		  // WP won't let you change login (username)
-		  // Note that you can pass wp_update_user() an array of fields to
-		  // update; they're not the same as being used here (and probably
-		  // in the existing WP-API User entity definition). Won't bother
-		  // using that capability here either way, for now.
-		  // https://github.com/WP-API/WP-API/blob/master/docs/schema.md#user
-		  // That uses ID, name (=display_name? user_nicename?), slug, URL, avatar, meta
-		  // (where are these in WP_User?)
-		  // http://codex.wordpress.org/Class_Reference/WP_User
-		  // http://wpsmith.net/2012/wp/an-introduction-to-wp_user-class/
-		  // There's tonnes more stuff in WP_User to work with. This is a start.
+		// Won't let them update these fields: ID, login, pass, registered,
+		// WP won't let you change login (username)
+		// Note that you can pass wp_update_user() an array of fields to
+		// update; they're not the same as being used here (and probably
+		// in the existing WP-API User entity definition). Won't bother
+		// using that capability here either way, for now.
+		// https://github.com/WP-API/WP-API/blob/master/docs/schema.md#user
+		// That uses ID, name (=display_name? user_nicename?), slug, URL, avatar, meta
+		// (where are these in WP_User?)
+		// http://codex.wordpress.org/Class_Reference/WP_User
+		// http://wpsmith.net/2012/wp/an-introduction-to-wp_user-class/
+		// There's tonnes more stuff in WP_User to work with. This is a start.
 
-		  if ( ! empty( $data['nicename'] ) ) {
-			$user->user_nicename = $data['nicename'];
-		  }
-		  if ( ! empty( $data['email'] ) ) {
-			$user->user_email = $data['email'];
-		  }
-		  if ( ! empty( $data['url'] ) ) {
-			$user->user_url = $data['url'];
-		  }
-		  if ( ! empty( $data['display_name'] ) ) {
-			$user->display_name = $data['display_name'];
-		  }
-		  if ( ! empty( $data['first_name'] ) ) {
-			$user->first_name = $data['first_name'];
-		  }
-		  if ( ! empty( $data['last_name'] ) ) {
-			$user->last_name = $data['last_name'];
-		  }
-		  if ( ! empty( $data['nickname'] ) ) {
-			$user->nickname = $data['nickname'];
-		  }
-		  if ( ! empty( $data['description'] ) ) {
-			$user->description = $data['description'];
-		  }
+		if ( ! empty( $data[ 'nicename' ] ) ) {
+			$user->user_nicename = $data[ 'nicename' ];
+		}
+		if ( ! empty( $data[ 'email' ] ) ) {
+			$user->user_email = $data[ 'email' ];
+		}
+		if ( ! empty( $data[ 'url' ] ) ) {
+			$user->user_url = $data[ 'url' ];
+		}
+		if ( ! empty( $data[ 'display_name' ] ) ) {
+			$user->display_name = $data[ 'display_name' ];
+		}
+		if ( ! empty( $data[ 'first_name' ] ) ) {
+			$user->first_name = $data[ 'first_name' ];
+		}
+		if ( ! empty( $data[ 'last_name' ] ) ) {
+			$user->last_name = $data[ 'last_name' ];
+		}
+		if ( ! empty( $data[ 'nickname' ] ) ) {
+			$user->nickname = $data[ 'nickname' ];
+		}
+		if ( ! empty( $data[ 'description' ] ) ) {
+			$user->description = $data[ 'description' ];
+		}
 
 	}
 
