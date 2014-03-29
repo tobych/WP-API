@@ -64,6 +64,13 @@ class WP_JSON_Users {
                 return $struct;
         }
 
+	/**
+	 * Retrieve a user.
+	 *
+	 * @param int $id User ID
+	 * @param array $fields User fields to return (optional; NOT IMPLEMENTED)
+	 * @return array User entity
+	 */
 	public function get_user( $id, $context = 'view' ) {
 		$id = (int) $id;
 
