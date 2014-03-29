@@ -129,6 +129,12 @@ class WP_JSON_Users {
 			'last_name' => $user->last_name,  // is also in meta
 			'nickname' => $user->nickname,  // is also in meta
 			'description' => $user->description,  // is also in meta
+			'meta' => array(
+				'links' => array(
+					'self' => json_url( '/users/' . $user->ID ),
+					'archives' => json_url( '/users/' . $user->ID . '/posts' ), // not implemented at time of writing
+				),
+			),
 		);
 		// https://codex.wordpress.org/Metadata_API
 		// "Objects may contain multiple metadata entries that share the same key and differ only in their value."
