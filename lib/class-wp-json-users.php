@@ -38,9 +38,9 @@ class WP_JSON_Users {
 	}
 
 	/**
-	 * Retrieve posts.
+	 * Retrieve users.
 	 *
-	 * The optional $filter parameter modifies the query used to retrieve posts.
+	 * The optional $filter parameter modifies the query used to retrieve users.
 	 * Accepted keys are TBW. (not implemented)
 	 *
 	 * The optional $fields parameter specifies what fields will be included
@@ -123,7 +123,7 @@ class WP_JSON_Users {
 	 * All other fields will retain their existing values.
 	 *
 	 * @param int $id User ID to edit
-	 * @param array $data Data construct, see {@see WP_JSON_Posts::new_post}
+	 * @param array $data Data construct
 	 * @param array $_headers Header data
 	 * @return true on success
 	 */
