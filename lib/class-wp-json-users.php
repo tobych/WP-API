@@ -31,7 +31,7 @@ class WP_JSON_Users {
 			),
 			'/users/(?P<id>\d+)' => array(
 				array( array( $this, 'get_user' ), WP_JSON_Server::READABLE ),
-
+				array( array( $this, 'edit_user' ), WP_JSON_Server::EDITABLE | WP_JSON_Server::ACCEPT_JSON ),
 			)
 		);
 		return array_merge( $routes, $user_routes );
@@ -114,6 +114,102 @@ class WP_JSON_Users {
 		       'description' => $user->description,
 		  );
 		  return $user_fields;
+	}
+
+	/**
+	 * Edit a user.
+	 *
+	 * The $data parameter only needs to contain fields that should be changed.
+	 * All other fields will retain their existing values.
+	 *
+	 * @param int $id User ID to edit
+	 * @param array $data Data construct, see {@see WP_JSON_Posts::new_post}
+	 * @param array $_headers Header data
+	 * @return true on success
+	 */
+	function edit_user( $id, $data, $_headers = array() ) {
+		$id = (int) $id;
+
+		if ( empty( $id ) )
+			return new WP_Error( 'json_user_invalid_id', __( 'Invalid user ID (EMPTY).' ), array( 'status' => 404 ) );
+
+		// http://codex.wordpress.org/Function_Reference/get_userdata
+		$user = get_userdata( $id );  // returns False on failure
+
+		if ( ! $user )
+			return new WP_Error( 'json_user_invalid_id', __( 'Invalid user ID (COULD NOT LOAD).' ), array( 'status' => 404 ) );
+
+		// Permissions check
+		if ( ! current_user_can( 'edit_users' ) ) {
+			return new WP_Error( 'json_cannot_edit', __( 'Sorry, you are not allowed to edit this user.' ), array( 'status' => 401 ) );
+		}
+
+		// Update attributes of the user from $data
+		$retval = $this->update_user( $user, $data );
+		if ( is_wp_error( $retval ) ) {
+			return $retval;
+		}
+
+		// TBD Pre-insert/update hook (I don't understand what one of those is yet)
+
+		// Update the user in the database
+		// http://codex.wordpress.org/Function_Reference/wp_update_user
+		$retval = wp_update_user( $user );
+		if ( is_wp_error( $retval ) ) {
+			return $retval;
+		}
+
+		// http://codex.wordpress.org/Function_Reference/do_action
+		do_action( 'json_insert_user', $user, $data, true );  // $update is always true
+
+		return $this->get_user( $id );
+	}
+
+	// I don't like the insert_post method this is based on;
+	// doing things my way; can refactor later; needs discussion;
+	// this can be used when creating users too, with defaults already
+	// in place.
+	// user is a WP_User; $data is an array of fields to update
+	protected function update_user( $user, $data ) {
+
+		  // Won't let them update these fields: ID, login, pass, registered,
+		  // WP won't let you change login (username)
+		  // Note that you can pass wp_update_user() an array of fields to
+		  // update; they're not the same as being used here (and probably
+		  // in the existing WP-API User entity definition). Won't bother
+		  // using that capability here either way, for now.
+		  // https://github.com/WP-API/WP-API/blob/master/docs/schema.md#user
+		  // That uses ID, name (=display_name? user_nicename?), slug, URL, avatar, meta
+		  // (where are these in WP_User?)
+		  // http://codex.wordpress.org/Class_Reference/WP_User
+		  // http://wpsmith.net/2012/wp/an-introduction-to-wp_user-class/
+		  // There's tonnes more stuff in WP_User to work with. This is a start.
+
+		  if ( ! empty( $data['nicename'] ) ) {
+			$user->user_nicename = $data['nicename'];
+		  }
+		  if ( ! empty( $data['email'] ) ) {
+			$user->user_email = $data['email'];
+		  }
+		  if ( ! empty( $data['url'] ) ) {
+			$user->user_url = $data['url'];
+		  }
+		  if ( ! empty( $data['display_name'] ) ) {
+			$user->display_name = $data['display_name'];
+		  }
+		  if ( ! empty( $data['first_name'] ) ) {
+			$user->first_name = $data['first_name'];
+		  }
+		  if ( ! empty( $data['last_name'] ) ) {
+			$user->last_name = $data['last_name'];
+		  }
+		  if ( ! empty( $data['nickname'] ) ) {
+			$user->nickname = $data['nickname'];
+		  }
+		  if ( ! empty( $data['description'] ) ) {
+			$user->description = $data['description'];
+		  }
+
 	}
 
 }
