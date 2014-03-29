@@ -51,6 +51,11 @@ class WP_JSON_Users {
 	 * @return array contains a collection of User entities.
 	 */
 	public function get_users( $filter = array(), $context = 'view', $type = 'user', $page = 1 ) {
+
+		if ( ! current_user_can( 'edit_users' ) ) {
+			return new WP_Error( 'json_cannot_get', __( 'Sorry, you are not allowed to get users.' ), array( 'status' => 401 ) );
+		}
+
 		$args = array('orderby' => 'user_login', 'order' => 'ASC');
                 $user_query = new WP_User_Query($args);
                 $struct = array();
@@ -73,6 +78,10 @@ class WP_JSON_Users {
 	 */
 	public function get_user( $id, $context = 'view' ) {
 		$id = (int) $id;
+
+		if ( ! current_user_can( 'edit_users' ) ) {
+			return new WP_Error( 'json_cannot_get', __( 'Sorry, you are not allowed to get users.' ), array( 'status' => 401 ) );
+		}
 
 		if ( empty( $id ) )
 			return new WP_Error( 'json_user_invalid_id', __( 'Invalid user ID.' ), array( 'status' => 404 ) );
