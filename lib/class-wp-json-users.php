@@ -151,7 +151,7 @@ class WP_JSON_Users {
 
 		// TODO: Don't use "meta" as it's used in the JSON response for eg links.self; use user_meta instead
 		// TODO: Add our own "meta" stuff with links.self
-		$user_fields['meta'] = $this->prepare_meta( $user_meta );
+		$user_fields['user_meta'] = $this->prepare_meta( $user_meta );
 		return $user_fields;
 	}
 
@@ -300,12 +300,12 @@ class WP_JSON_Users {
 			$user->description = $data[ 'description' ];
 		}
 
-		if ( ! empty( $data['meta'] ) ) {
+		if ( ! empty( $data['user_meta'] ) ) {
 			// https://codex.wordpress.org/Function_Reference/update_metadata
 			// https://codex.wordpress.org/Function_Reference/update_user_meta
 			// "update_user_meta does not delete the meta if the new value is empty"
 			// TODO: Do something about that. Maybe treat each metadata item as a separate resource?
-			foreach ( $data['meta'] as $meta_key => $meta_value_or_values ) {
+			foreach ( $data['user_meta'] as $meta_key => $meta_value_or_values ) {
 				// "The new desired value of the meta_key, which must be different from the existing value.
 				// Arrays and objects will be automatically serialized"
 				// Really? It MUST be different? Actually, it just returns false. And we don't care.
