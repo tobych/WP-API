@@ -164,7 +164,7 @@ class WP_JSON_Users {
 	protected function prepare_meta( $meta ) {
 		$prepared_meta = [];
 		foreach ( $meta as $meta_key => $meta_values ) {
-			$prepared_meta[$meta_key] = [];
+			$prepared_meta_values = [];
 			foreach ( $meta_values as $meta_value ) {
 				if ( is_serialized( $meta_value ) ) {
 					$prepared_meta_value = [
@@ -174,8 +174,12 @@ class WP_JSON_Users {
 			    } else {
 					$prepared_meta_value = $meta_value;
 				}
-				$prepared_meta[$meta_key][] = $prepared_meta_value;
+				$prepared_meta_values[] = $prepared_meta_value;
 			}
+			// if ( $represent_one_item_as_such && count ( $prepared_meta_values ) == 1 ) {
+			//	$prepared_meta_values = $prepared_meta_values[0];
+			// }
+			$prepared_meta[$meta_key] = $prepared_meta_values;
 		}
 		return $prepared_meta;
 	}
@@ -325,7 +329,8 @@ class WP_JSON_Users {
 				// TODO: Error out here if $meta_values is not an array (and pass that back up to the server)
 				// I don't get it. You get an array from get_user_meta, but if you provide one, it serializes it. Uh?
 
-				// This is so users can provide single values rather than an array
+				// This is so users can provide single values rather than an array...
+				// we need to make sure don't treat stuff that'll be serialized like this though.
 				if ( ! is_array($meta_value_or_values)) {
 					$meta_values = array( $meta_value_or_values );
 				} else {
