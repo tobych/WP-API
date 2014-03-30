@@ -62,7 +62,7 @@ class WP_JSON_Users {
 		$struct = array();
 		if ( ! empty( $user_query->results ) ) {
 			foreach ( $user_query->results as $user ) {
-				$struct[ ] = $this->prepare_user( $user, $context );
+				$struct[] = $this->prepare_user( $user, $context );
 			}
 		} else {
 			return array();
@@ -161,15 +161,15 @@ class WP_JSON_Users {
 	}
 
 	protected function prepare_meta( $meta ) {
-		$prepared_meta = [];
+		$prepared_meta = array();
 		foreach ( $meta as $meta_key => $meta_values ) {
-			$prepared_meta_values = [];
+			$prepared_meta_values = array();
 			foreach ( $meta_values as $meta_value ) {
 				if ( is_serialized( $meta_value ) ) {
-					$prepared_meta_value = [
+					$prepared_meta_value = array(
 						'unserialized' => @unserialize( $meta_value ),
 						'serialized' => $meta_value,  // for completeness, testing, debugging
-					];
+					);
 			    } else {
 					$prepared_meta_value = $meta_value;
 				}
@@ -178,7 +178,7 @@ class WP_JSON_Users {
 			// if ( $represent_one_item_as_such && count ( $prepared_meta_values ) == 1 ) {
 			//	$prepared_meta_values = $prepared_meta_values[0];
 			// }
-			$prepared_meta[$meta_key] = $prepared_meta_values;
+			$prepared_meta[ $meta_key ] = $prepared_meta_values;
 		}
 		return $prepared_meta;
 	}
@@ -284,19 +284,19 @@ class WP_JSON_Users {
 		// http://wpsmith.net/2012/wp/an-introduction-to-wp_user-class/
 		// There's tonnes more stuff in WP_User to work with. This is a start.
 
-		if ( ! empty( $data[ 'name' ] ) ) {
+		if ( ! empty( $data['name'] ) ) {
 			$user->display_name = $data[ 'name' ];
 		}
-		if ( ! empty( $data[ 'slug' ] ) ) {
+		if ( ! empty( $data['slug'] ) ) {
 			$user->user_nicename = $data[ 'slug' ];
 		}
-		if ( ! empty( $data[ 'URL' ] ) ) {
+		if ( ! empty( $data['URL'] ) ) {
 			$user->user_url = $data[ 'URL' ];
 		}
 		// ignore avatar - read-only (so don't include it? move to meta instead?)
 		// ignore username - can't change this
-		if ( ! empty( $data[ 'email' ] ) ) {
-			$user->user_email = $data[ 'email' ];
+		if ( ! empty( $data['email'] ) ) {
+			$user->user_email = $data['email'];
 		}
 		// ignore registered - probably no need
 
