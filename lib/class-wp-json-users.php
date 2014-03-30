@@ -117,18 +117,17 @@ class WP_JSON_Users {
 		// http://codex.wordpress.org/Function_Reference/get_metadata
 		// http://code.tutsplus.com/articles/mastering-wordpress-meta-data-understanding-and-using-arrays--wp-34596
 		$user_fields = array(
+			// As per https://github.com/WP-API/WP-API/blob/master/docs/schema.md#user
 			'ID' => $user->ID,
-			'login' => $user->user_login,
-			'pass' => $user->user_pass, // Is this plaintext?
-			'nicename' => $user->user_nicename,
+			'name' => $user->display_name,
+			'slug' => $user->user_nicename,
+			'URL' => $user->user_url,  // TODO: this is called 'Website' in the Wordpress users page. Use that?
+			'avatar' => $this->server->get_avatar_url( $user->user_email ),
+			// Extra stuff that seems important and isn't in meta
+			'username' => $user->user_login,  // TODO: call it 'login'?
 			'email' => $user->user_email,
-			'url' => $user->user_url,
 			'registered' => $user->user_registered,
-			'display_name' => $user->display_name,
-			'first_name' => $user->first_name,  // is also in meta
-			'last_name' => $user->last_name,  // is also in meta
-			'nickname' => $user->nickname,  // is also in meta
-			'description' => $user->description,  // is also in meta
+			// TODO: There's also user_activation_key, user_status, password... roles?
 			'meta' => array(
 				'links' => array(
 					'self' => json_url( '/users/' . $user->ID ),
@@ -285,30 +284,21 @@ class WP_JSON_Users {
 		// http://wpsmith.net/2012/wp/an-introduction-to-wp_user-class/
 		// There's tonnes more stuff in WP_User to work with. This is a start.
 
-		if ( ! empty( $data[ 'nicename' ] ) ) {
-			$user->user_nicename = $data[ 'nicename' ];
+		if ( ! empty( $data[ 'name' ] ) ) {
+			$user->display_name = $data[ 'name' ];
 		}
+		if ( ! empty( $data[ 'slug' ] ) ) {
+			$user->user_nicename = $data[ 'slug' ];
+		}
+		if ( ! empty( $data[ 'URL' ] ) ) {
+			$user->user_url = $data[ 'URL' ];
+		}
+		// ignore avatar - read-only (so don't include it? move to meta instead?)
+		// ignore username - can't change this
 		if ( ! empty( $data[ 'email' ] ) ) {
 			$user->user_email = $data[ 'email' ];
 		}
-		if ( ! empty( $data[ 'url' ] ) ) {
-			$user->user_url = $data[ 'url' ];
-		}
-		if ( ! empty( $data[ 'display_name' ] ) ) {
-			$user->display_name = $data[ 'display_name' ];
-		}
-		if ( ! empty( $data[ 'first_name' ] ) ) {
-			$user->first_name = $data[ 'first_name' ];
-		}
-		if ( ! empty( $data[ 'last_name' ] ) ) {
-			$user->last_name = $data[ 'last_name' ];
-		}
-		if ( ! empty( $data[ 'nickname' ] ) ) {
-			$user->nickname = $data[ 'nickname' ];
-		}
-		if ( ! empty( $data[ 'description' ] ) ) {
-			$user->description = $data[ 'description' ];
-		}
+		// ignore registered - probably no need
 
 		if ( ! empty( $data['user_meta'] ) ) {
 			// https://codex.wordpress.org/Function_Reference/update_metadata
